@@ -1,5 +1,6 @@
 /*
  * comment, constants
+ * plaeyer 1 always goes first -> fix
  */
  
 public class Yahtzee
@@ -10,12 +11,15 @@ public class Yahtzee
 	private boolean finished = false;
 	private int round = 0;
 	private YahtzeePlayer player1, player2;
+	private YahtzeeScoreCard player1ScoreCard, player2ScoreCard;
 	
 	public Yahtzee() {
 		dice1 = new DiceGroup();
 		dice2 = new DiceGroup();
 		player1 = new YahtzeePlayer();
 		player2 = new YahtzeePlayer();
+		player1ScoreCard = new YahtzeeScoreCard();
+		player2ScoreCard = new YahtzeeScoreCard();
 	}
 	
 	public static void main (String args[]) {
@@ -50,8 +54,16 @@ public class Yahtzee
 			
 			playTurn(0, dice1, 0);
 			countScore(0, dice1); 
+			printScore();
+			int choice1 = Prompt.getInt(name1 + ", now you need to make a choice. Pick a valid integer from the list above (1 - 13)");
+			player1ScoreCard.changeScore(choice1, dice1);
+			
+			printScore();
 			playTurn(1, dice2, 0);
 			countScore(0, dice2);
+			printScore();
+			int choice2 = Prompt.getInt(name1 + ", now you need to make a choice. Pick a valid integer from the list above (1 - 13)");
+			player2ScoreCard.changeScore(choice2, dice2);
 			
 			// update things after turn
 			round++;
@@ -122,7 +134,7 @@ public class Yahtzee
 		}
 		
 		// hold + reroll
-		String hold = Prompt.getString("Which di(c)e would you like to keep? Enter"
+		String hold = Prompt.getString("Which di(c)e would you like to keep? Enter "
 					+ "the values you'd like to 'hold' without \nspaces. "
 					+ "For examples, if you'd like to 'hold' die 1, 2, "
 					+ "and 5, enter 125 \n(enter -1 if you'd like to end "
@@ -144,5 +156,6 @@ public class Yahtzee
 		yzs.printCardHeader();
 		yzs.printPlayerScore(player1);
 		yzs.printPlayerScore(player2);
+		yzs.printCardFooter();
 	}
 }

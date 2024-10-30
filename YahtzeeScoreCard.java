@@ -4,7 +4,7 @@ public class YahtzeeScoreCard
 	int [] scores = new int [13]; 
 	
 	public YahtzeeScoreCard() {
-		for (int i = 0; i < scores; i++) scores[i] = 0;
+		for (int i = 0; i < 13; i++) scores[i] = 0;
 	}
 	
 	private final int NUMBER_SCORE = 6;
@@ -15,7 +15,7 @@ public class YahtzeeScoreCard
 	private final int CHANCE = 12;
 	private final int YAHTZEE_SCORE = 13;
 	
-	public void updateScore(int choice) {
+	public void updateScore(int choice, DiceGroup dg) {
 		if (choice <= NUMBER_SCORE) numberScore(choice, dg);
 		else if (choice <= THREE_FOUR_OF_A_KIND) threeFourOfAKind(dg);
 		else if (choice == FULL_HOUSE) fullHouse(dg);
@@ -51,6 +51,11 @@ public class YahtzeeScoreCard
 		System.out.printf("+----------------------------------------------------" +
 						"---------------------------+\n");
 	}
+	
+	// print bottom score
+	public void printCardFooter() {
+		System.out.printf("     \t\t  1    2    3    4    5    6    7    8    9   10   11   12   13\n");
+	}
 
 
 	/**
@@ -65,7 +70,7 @@ public class YahtzeeScoreCard
 		
 		if (choice == 7 || choice == 8) { // of a kind -> sum
 			int sum = 0;
-			for (int i = 0; i < 5; i++) sum += dg[i].getValue();
+			for (int i = 0; i < 5; i++) sum += dg.getDiceValue(i);
 			
 			scores[choice-1] = sum;
 		} 
@@ -75,7 +80,7 @@ public class YahtzeeScoreCard
 	}
 	
 	public int getScore(int num) {
-		return scores[i];
+		return scores[num-1];
 	}
 	
 	/**
@@ -98,7 +103,7 @@ public class YahtzeeScoreCard
 		
 		for (int i = 0; i < 6; i++) freq[i] = 0;
 		for (int i = 0; i < 5; i++) {
-			freq[dg[i].getValue-1]++;
+			freq[dg.getDiceValue(i)-1]++;
 		}
 		
 		for (int i = 0; i < 6; i++) {
@@ -117,7 +122,7 @@ public class YahtzeeScoreCard
 		
 		for (int i = 0; i < 6; i++) freq[i] = 0;
 		for (int i = 0; i < 5; i++) {
-			freq[dg[i].getValue-1]++;
+			freq[dg.getDiceValue(i)-1]++;
 		}
 		
 		for (int i = 0; i < 6; i++) {
@@ -142,7 +147,7 @@ public class YahtzeeScoreCard
 		
 		for (int i = 0; i < 6; i++) freq[i] = 0;
 		for (int i = 0; i < 5; i++) {
-			freq[dg[i].getValue-1]++;
+			freq[dg.getDiceValue(i)-1]++;
 		}
 		
 		for (int i = 0; i < 6; i++) {

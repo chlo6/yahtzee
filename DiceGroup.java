@@ -128,4 +128,8 @@ public class DiceGroup {
 				return 6;
 		}
 	}
+	
+	public int getDiceValue(int index) {
+		return die[index].getValue();
+	}
 }
