@@ -1,3 +1,14 @@
+/**
+ * 
+ * 	Generates the group of 5 dice for each player and has various 
+ * 	methods, for example a method that prints it and a getter
+ * 	method. 
+ * 
+ * 	@author	Chloe He
+ * 	@since	October 23, 2024
+ * 
+ */ 
+
 public class DiceGroup {
 	
 	private Dice [] die;	// the array of dice
@@ -13,7 +24,7 @@ public class DiceGroup {
 								"| O     |",
 								"|_______|" };
 	
-	/*	you complete */
+	/*	constructor, initializes die faces */
 	public DiceGroup() { 
 		die = new Dice [NUM_DICE];
 	}
@@ -129,6 +140,10 @@ public class DiceGroup {
 		}
 	}
 	
+	/**
+	 * Gets the die's value
+	 * @param index	the die # that you want
+	 */ 
 	public int getDiceValue(int index) {
 		return die[index].getValue();
 	}
