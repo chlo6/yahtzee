@@ -12,6 +12,7 @@ public class Yahtzee
 	private int round = 0;
 	private YahtzeePlayer player1, player2;
 	private YahtzeeScoreCard player1ScoreCard, player2ScoreCard;
+	boolean secondPlayerFirst = false;
 	
 	public Yahtzee() {
 		dice1 = new DiceGroup();
@@ -34,41 +35,45 @@ public class Yahtzee
 		do {
 			name1 = Prompt.getString("Player 1, please enter your first name");
 		} while (name1.equals(""));
-		player1.setName(name1);
 		
 		do { 
 			name2 = Prompt.getString("Player 2, please enter your first name");
 		} while (name2.equals(""));
-		player2.setName(name2);
 		System.out.println();
 		
 		// find the first player
 		curPlayer = getPlayerOne();
-		while (curPlayer == -1) getPlayerOne();
+		while (curPlayer == -1) curPlayer = getPlayerOne();
 		
 		// play game
 		while (!finished) {
 			// print header
-			printScore();
+			printScore(false);
 			System.out.println("\nRound " + (round + 1) + " of 13 rounds.\n\n");
 			
-			playTurn(0, dice1, 0);
+			playTurn(player1, dice1, 0);
 			countScore(0, dice1); 
-			printScore();
-			int choice1 = Prompt.getInt(name1 + ", now you need to make a choice. Pick a valid integer from the list above (1 - 13)");
+			printScore(true);
+			int choice1 = Prompt.getInt(player1.getName() + ", now you need to make a choice. Pick a valid integer from the list above (1 - 13)");
 			player1ScoreCard.changeScore(choice1, dice1);
 			
-			printScore();
-			playTurn(1, dice2, 0);
+			printScore(false);
+			
+			playTurn(player2, dice2, 0);
 			countScore(0, dice2);
-			printScore();
-			int choice2 = Prompt.getInt(name1 + ", now you need to make a choice. Pick a valid integer from the list above (1 - 13)");
-			player2ScoreCard.changeScore(choice2, dice2);
+			printScore(true);
+			int choice2 = Prompt.getInt(player2.getName() + ", now you need to make a choice. Pick a valid integer from the list above (1 - 13)");
+			player2ScoreCard.changeScore(choice2, dice2); // check if used already
 			
 			// update things after turn
 			round++;
 			curPlayer = (curPlayer + 1) % 2;
 			if (round >= 12) finished = true;
+		}
+		
+		int total1 = player1ScoreCard.scoreTotal(), total2 = player2ScoreCard.scoreTotal();
+		if (secondPlayerFirst) {
+			System.out.println
 		}
 	}
 	
@@ -114,17 +119,24 @@ public class Yahtzee
 		
 		System.out.println(winner + ", since your sum was higher, "
 					+ "you'll roll first.");
-		if (winner.equals(name1)) return 0;
-		return 1;
+		if (winner.equals(name1)) {
+			player1.setName(name1);
+			player2.setName(name2);
+			return 0;
+		} else {
+			player1.setName(name2);
+			player2.setName(name1);
+			secondPlayerFirst = true;
+			return 1;
+		}
 	}
 	
-	public void playTurn(int playerNumber, DiceGroup dice, int turnCount) {
+	public void playTurn(YahtzeePlayer player, DiceGroup dice, int turnCount) {
 		// if turn count up -> break
 		if (turnCount >= 3) return;
 		
 		// find players name
-		String name = name1;
-		if (playerNumber == 1) name = name2;
+		String name = player.getName();
 		
 		// if first turn -> set all dice values
 		if (turnCount == 0) {
@@ -145,17 +157,21 @@ public class Yahtzee
 		
 		// roll the dice, go to next move
 		dice.rollDice(hold);
-		playTurn(playerNumber, dice, turnCount + 1);
+		playTurn(player, dice, turnCount + 1);
 	}
 	
 	public void countScore (int playerNumber, DiceGroup dice) {
 	}
 	
-	public void printScore() {
-		YahtzeeScoreCard yzs = new YahtzeeScoreCard();
-		yzs.printCardHeader();
-		yzs.printPlayerScore(player1);
-		yzs.printPlayerScore(player2);
-		yzs.printCardFooter();
+	public void printScore(boolean printFooter) {
+		player1ScoreCard.printCardHeader();
+		if (secondPlayerFirst) {
+			player2ScoreCard.printPlayerScore(player2);
+			player1ScoreCard.printPlayerScore(player1);
+		} else {
+			player1ScoreCard.printPlayerScore(player1);
+			player2ScoreCard.printPlayerScore(player2);
+		}
+		if (printFooter) player1ScoreCard.printCardFooter();
 	}
 }

@@ -4,7 +4,7 @@ public class YahtzeeScoreCard
 	int [] scores = new int [13]; 
 	
 	public YahtzeeScoreCard() {
-		for (int i = 0; i < 13; i++) scores[i] = 0;
+		for (int i = 0; i < 13; i++) scores[i] = -1;
 	}
 	
 	private final int NUMBER_SCORE = 6;
@@ -17,7 +17,7 @@ public class YahtzeeScoreCard
 	
 	public void updateScore(int choice, DiceGroup dg) {
 		if (choice <= NUMBER_SCORE) numberScore(choice, dg);
-		else if (choice <= THREE_FOUR_OF_A_KIND) threeFourOfAKind(dg);
+		else if (choice <= THREE_FOUR_OF_A_KIND) threeFourOfAKind(choice, dg);
 		else if (choice == FULL_HOUSE) fullHouse(dg);
 		else if (choice == SMALL_STRAIGHT) smallStraight(dg);
 		else if (choice == LARGE_STRAIGHT) largeStraight(dg);
@@ -42,9 +42,10 @@ public class YahtzeeScoreCard
 	 */
 	public void printPlayerScore(YahtzeePlayer player) {
 		System.out.printf("| %-12s |", player.getName());
-		for (int i = 1; i < 14; i++) {
-			if (getScore(i) > -1)
-				System.out.printf(" %2d |", getScore(i));
+		for (int i = 0; i < 13; i++) {
+			if (scores[i] > -1) {
+				System.out.printf(" %2d |", scores[i]);
+			}
 			else System.out.printf("    |");
 		}
 		System.out.println();
@@ -65,18 +66,18 @@ public class YahtzeeScoreCard
 	 *  @param dg  The DiceGroup to score
 	 *  @return  true if change succeeded. Returns false if choice already taken.
 	 */
-	public boolean changeScore(int choice, DiceGroup dg) {
-		if (scores[choice-1] != 0) return false;
+	 
+
+	public void changeScore(int choice, DiceGroup dg) {
 		
-		if (choice == 7 || choice == 8) { // of a kind -> sum
-			int sum = 0;
-			for (int i = 0; i < 5; i++) sum += dg.getDiceValue(i);
-			
-			scores[choice-1] = sum;
-		} 
-		//update
-		
-		return true;
+		if (choice <= 6) numberScore(choice, dg);
+		else if (choice <= 8) threeFourOfAKind(choice, dg);
+		else if (choice == 9) fullHouse(dg);
+		else if (choice == 10) smallStraight(dg);
+		else if (choice == 11) largeStraight(dg);
+		else if (choice == 12) chance(dg);
+		else if (choice == 13) yahtzeeScore(dg);
+						
 	}
 	
 	public int getScore(int num) {
@@ -89,14 +90,20 @@ public class YahtzeeScoreCard
 	 *  @param choice The choice of the player 1 to 6
 	 *  @param dg  The DiceGroup to score
 	 */
-	public void numberScore(int choice, DiceGroup dg) {}
+	public void numberScore(int choice, DiceGroup dg) {
+		int sum = 0;
+		for (int i = 0; i < 5; i++) {
+			if (dg.getDiceValue(i) == choice) sum += choice;
+		}
+		scores[choice-1] = sum;
+	}
 	
 	/**
 	 *	Updates the scorecard for Three or Four Of A Kind choice.
 	 *
 	 *	@param dg	The DiceGroup to score
 	 */	
-	public void threeFourOfAKind(DiceGroup dg) {
+	public void threeFourOfAKind(int choice, DiceGroup dg) {
 		
 		// get frequency
 		int[] freq = new int [6];
@@ -106,13 +113,21 @@ public class YahtzeeScoreCard
 			freq[dg.getDiceValue(i)-1]++;
 		}
 		
+		boolean works = false;
+		
 		for (int i = 0; i < 6; i++) {
-			if (freq[i] >= 4) { // 4 of a kind
-				changeScore(8, dg);
-			} else if (freq[i] >= 3) { // 3 of a kind
-				changeScore(7, dg);
-			}
+			if (choice == 8 && freq[i] >= 4) works = true;
+			else if (choice == 7 && freq[i] >= 3) works = true;
 		}			
+		
+		if (choice == 8) {
+			if (works) scores[7] = dg.getTotal();
+			else scores[7] = 0;
+		} else if (choice == 7) {
+			if (works) scores[6] = dg.getTotal();
+			else scores[6] = 0;
+		}
+
 	}
 		
 	public void fullHouse(DiceGroup dg) {
@@ -130,19 +145,52 @@ public class YahtzeeScoreCard
 			else if (freq[i] == 3) found3 = true;
 		}	
 		
-		if (found2 && found3) changeScore(9, dg);
+		if (found2 && found3) scores[8] = 25;
+		else scores[8] = 0;
 	}
 	
 	public void smallStraight(DiceGroup dg) {
+		int[] freq = new int [6];
 		
+		for (int i = 0; i < 6; i++) freq[i] = 0;
+		for (int i = 0; i < 5; i++) {
+			freq[dg.getDiceValue(i)-1]++;
+		}
+		
+		boolean works = false;
+		
+		for (int i = 0; i < 3; i++) {
+			if (freq[i] > 0 && freq[i+1] > 0 && freq[i + 2] > 0 && freq[i + 3] > 0) works = true;
+		}
+			
+		
+		if (works) scores[9] = 30;
+		else scores[9] = 0;
 	}
 	
-	public void largeStraight(DiceGroup dg) {}
+	public void largeStraight(DiceGroup dg) {
+		int[] freq = new int [6];
+		
+		for (int i = 0; i < 6; i++) freq[i] = 0;
+		for (int i = 0; i < 5; i++) {
+			freq[dg.getDiceValue(i)-1]++;
+		}
+		
+		boolean works = true;
+		
+		for (int i = 1; i < 4; i++) {
+			if (freq[i] != 1) works = false;
+		}
+		
+		if (works) scores[10] = 40;
+		else scores[10] = 0;
+	}
 	
-	public void chance(DiceGroup dg) {}
+	public void chance(DiceGroup dg) {
+		scores[11] = dg.getTotal();
+	}
 	
 	public void yahtzeeScore(DiceGroup dg) {
-		// get frequency
 		int[] freq = new int [6];
 		
 		for (int i = 0; i < 6; i++) freq[i] = 0;
@@ -151,7 +199,13 @@ public class YahtzeeScoreCard
 		}
 		
 		for (int i = 0; i < 6; i++) {
-			if (freq[i] == 5) changeScore(13, dg);
-		}		
+			if (freq[i] == 5) scores[12] = 50;
+		}
+	}
+	
+	public int scoreTotal() {
+		int sum = 0;
+		for (int i = 0; i < scores.length(); i++) sum += scores[i];
+		return sum;
 	}
 }
